@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output and TypeScript cache
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Environment variables and local configuration
+.env
+.env.*
+!.env.example
+
+# Dependency lockfile (ignored as requested)
+package-lock.json
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Generated transcript data
+transcripts/
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

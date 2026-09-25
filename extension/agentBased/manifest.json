@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "orbitDesk Meeting Notetaker",
+  "version": "1.0.0",
+  "description": "Invites an orbitDesk bot to Google Meet meetings and saves the transcript.",
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": [
+    "https://meet.google.com/*",
+    "http://localhost:3000/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "orbitDesk Meeting Notetaker",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://meet.google.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
