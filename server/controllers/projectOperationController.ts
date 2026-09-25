@@ -1,11 +1,16 @@
 
-import { createProject } from "../dbQueries/neonQueries.js";
+import { createProject, fetchAllProjects } from "../dbQueries/neonQueries.js";
 
 async function createProjectController(projectName: string, description: string | null) {
   return createProject(projectName, description);
 }
 
-export { createProjectController };
+async function fetchAllProjectsController()
+{
+  return fetchAllProjects();
+}
+
+export { createProjectController, fetchAllProjectsController };
 
 
 

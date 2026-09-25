@@ -5,11 +5,11 @@ import retryFetchTranscript from "../utils/retryFetchTranscript.js";
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 async function saveMeetingHandler(request: any, reply: any) {
-  const botId = request.body?.botId;
+  const agentId = request.body?.agentId;
   const projectId = request.body?.projectId;
 
-  if (typeof botId !== 'string' || !botId.trim()) {
-    return reply.code(400).send({ error: 'botId is required' });
+  if (typeof agentId !== 'string' || !agentId.trim()) {
+    return reply.code(400).send({ error: 'agentId is required' });
   }
 
   if (typeof projectId !== 'string' || !uuidPattern.test(projectId.trim())) {
@@ -19,14 +19,14 @@ async function saveMeetingHandler(request: any, reply: any) {
   const config = getMeetingBaasConfig(reply);
   if (!config) return;
 
-  const normalizedBotId = botId.trim();
+  const normalizedAgentId = agentId.trim();
   const normalizedProjectId = projectId.trim();
-  const retryResult = await retryFetchTranscript(normalizedBotId, config);
+  const retryResult = await retryFetchTranscript(normalizedAgentId, config);
 
   if (retryResult.status === 'pending') {
     return reply.code(202).send({
       message: 'Transcript is still processing. Try again later.',
-      botId: normalizedBotId,
+      agentId: normalizedAgentId,
       attempts: retryResult.attempts,
     });
   }
@@ -44,7 +44,7 @@ async function saveMeetingHandler(request: any, reply: any) {
     return reply.code(502).send({ error: 'Unable to reach the transcript provider' });
   }
 
-  let normalizedTranscript: { utterances: Array<{ text: string }> };
+  let normalizedTranscript: string;
   try {
     normalizedTranscript = await normalizeTranscript(retryResult.transcription);
   } catch (error: any) {
@@ -55,7 +55,7 @@ async function saveMeetingHandler(request: any, reply: any) {
   try {
     const meeting = await saveMeetingController(
       normalizedProjectId,
-      JSON.stringify(normalizedTranscript)
+      normalizedTranscript
     );
 
     return reply.code(201).send({ meeting, transcript: normalizedTranscript, attempts: retryResult.attempts });

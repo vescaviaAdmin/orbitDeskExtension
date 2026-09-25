@@ -1,5 +1,5 @@
 function getMeetingBaasConfig(reply: any) {
-    const apiUrl = process.env.MEETING_BAAS_BASEURL || "https://api.meetingbaas.com/v2/bots";
+    const apiUrl = process.env.MEETING_BAAS_BASEURL || "https://api.meetingbaas.com/v2/agents";
     const authKey = process.env.MEETING_BAAS_KEY;
 
     if (!authKey) {
