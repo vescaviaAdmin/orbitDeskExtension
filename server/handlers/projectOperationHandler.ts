@@ -1,5 +1,4 @@
-import { createProjectController } from "../controllers/projectOperationController.js";
-
+import { createProjectController, fetchAllProjectsController } from "../controllers/projectOperationController.js";
 
 
 async function createProjectHandler(request : any, reply : any) {
@@ -31,5 +30,15 @@ async function createProjectHandler(request : any, reply : any) {
   }
 }
 
+async function fetchAllProjectsHandler(_request: any, reply: any) {
+  try {
+    const projects = await fetchAllProjectsController();
+    return reply.code(200).send({ projects });
+  } catch (error) {
+    console.error('[Projects] Fetch-projects request failed.', error);
+    return reply.code(500).send({ error: 'Unable to fetch projects' });
+  }
+}
 
-export { createProjectHandler};
+
+export { createProjectHandler, fetchAllProjectsHandler};

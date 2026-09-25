@@ -12,12 +12,12 @@ fastify.get('/health', function(request, reply) {
    return reply.code(200).send({ result: 'Server is healthy' });
 });
 
-import transcriptRoutes from './routes/transcriptRoutes.js';
+import agentRoutes from './routes/agentRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import meetingRoutes from './routes/meetingRoutes.js';
 
-fastify.register(transcriptRoutes, {
-    prefix: "/transcripts"
+fastify.register(agentRoutes, {
+    prefix: "/agents"
 });
 fastify.register(projectRoutes, {
     prefix: "/projects"
@@ -35,7 +35,7 @@ const start = async() => {
     console.log(`Server is running on port ${port}`);
         
     } catch (error) {
-        console.log(`Error starting server ${error}`);
+        console.error('Error starting server:', error);
         process.exit(1);
     }
 }

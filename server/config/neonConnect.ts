@@ -11,6 +11,7 @@ const sql = neon(dbUrl);
 
 async function verifyNeonDb() {
   await sql`SELECT 1 AS connected`;
+  console.log('[Neon] Database connection verified.');
 }
 
 

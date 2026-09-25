@@ -5,7 +5,7 @@ type MeetingBaasConfig = {
     authKey: string;
 };
 
-async function inviteBotController(meetingUrl: string, config: MeetingBaasConfig) {
+async function inviteAgentController(meetingUrl: string, config: MeetingBaasConfig) {
     const reqBody = {
         meeting_url: meetingUrl,
         bot_name: "orbitDesk Notetaker",
@@ -16,7 +16,7 @@ async function inviteBotController(meetingUrl: string, config: MeetingBaasConfig
         }
     };
 
-    const botInvitationResponse = await fetch(config.apiUrl, {
+    const agentInvitationResponse = await fetch(config.apiUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -26,13 +26,13 @@ async function inviteBotController(meetingUrl: string, config: MeetingBaasConfig
     });
 
     return {
-        statusCode: botInvitationResponse.status,
-        body: await botInvitationResponse.json()
+        statusCode: agentInvitationResponse.status,
+        body: await agentInvitationResponse.json()
     };
 }
 
-async function getTranscriptController(botId: string, config: MeetingBaasConfig) {
-    const transcriptUrl = `${config.apiUrl.replace(/\/$/, "")}/${botId}`;
+async function getTranscriptController(agentId: string, config: MeetingBaasConfig) {
+    const transcriptUrl = `${config.apiUrl.replace(/\/$/, "")}/${agentId}`;
 
     const transcriptResponse = await fetch(transcriptUrl, {
         method: 'GET',
@@ -52,4 +52,4 @@ async function getTranscriptController(botId: string, config: MeetingBaasConfig)
 
 
 
-export { inviteBotController, getTranscriptController };
+export { inviteAgentController, getTranscriptController };

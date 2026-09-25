@@ -1,5 +1,4 @@
 const SESSION_KEY = "transcriptSession";
-const SAVE_URL = "http://localhost:3000/transcripts/save";
 
 async function getSession() {
   const data = await chrome.storage.local.get(SESSION_KEY);
@@ -119,39 +118,13 @@ async function stopAndSaveRecording() {
       type: "STOP_CAPTURE"
     });
   } catch {
-    // The Meet tab may already have been closed; save what was captured so far.
   }
-
-  const latestSession = await getSession();
-
-  const transcript = {
-    source: "Google Meet",
-    startedAt: latestSession?.startedAt ?? session.startedAt,
-    endedAt: new Date().toISOString(),
-    segmentCount: latestSession?.segments.length ?? session.segments.length,
-    segments: (latestSession?.segments ?? session.segments).map(({ id, ...segment }) => segment)
-  };
-
-  const response = await fetch(SAVE_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(transcript)
-  });
-
-  if (!response.ok) {
-    throw new Error(`Server failed to save transcript: ${response.status}`);
-  }
-
-  const result = await response.json();
 
   await clearSession();
 
   return {
     isRecording: false,
-    message: "Transcript saved.",
-    fileName: result.fileName
+    message: "Transcript captured."
   };
 }
 

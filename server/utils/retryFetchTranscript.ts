@@ -1,4 +1,4 @@
-import { getTranscriptController } from "../controllers/botOperationController.js";
+import { getTranscriptController } from "../controllers/agentOperationController.js";
 
 const waitTime = Number(process.env.WAIT_TIME) || 30000;
 const numberOfRetries = Number(process.env.NUMBER_OF_RETRIES) || 10;
@@ -7,10 +7,11 @@ function wait(milliseconds: number) {
   return new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
 }
 
-async function retryFetchTranscript(botId: string, config: any) {
+async function retryFetchTranscript(agentId: string, config: any) {
   for (let attempt = 1; attempt <= numberOfRetries; attempt += 1) {
     try {
-      const result = await getTranscriptController(botId, config);
+      console.log(`[Retry] Fetching transcript: attempt ${attempt}/${numberOfRetries}.`);
+      const result = await getTranscriptController(agentId, config);
 
       if (result.statusCode < 200 || result.statusCode >= 300) {
         console.error(`[Retry] Status returned ${result.statusCode}.`);
