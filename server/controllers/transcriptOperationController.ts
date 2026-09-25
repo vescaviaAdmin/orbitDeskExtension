@@ -8,40 +8,27 @@ const transcriptsDirectory = resolve(currentDirectory, "../../transcripts");
 
 
 async function normalizeTranscript(transcription: any) {
-  try {
-
-    const transcriptionUrl = transcription;
-
-    if (!transcriptionUrl) {
-      throw new Error('Transcription URL is missing');
-    }
-
-    const response = await fetch(transcriptionUrl);
-
-
-    if (!response.ok) {
-      throw new Error(
-        `Unable to download transcript: ${response.status} ${response.statusText}`
-      );
-    }
-
-    const transcriptData = await response.json();
-    const utterances = transcriptData?.result?.utterances;
-
-    if (!Array.isArray(utterances)) {
-      throw new Error("Transcript response does not contain result.utterances");
-    }
-
-    return {
-      utterances: utterances.map((utterance: any) => ({
-        speaker: utterance?.speaker ?? "Unknown",
-        text: utterance?.text ?? ""
-      }))
-    };
-  } catch (error) {
-    console.error('Error normalizing transcript:', error);
-    throw error;
+  if (!transcription) {
+    throw new Error('Transcription URL is missing');
   }
+
+  const response = await fetch(transcription);
+  if (!response.ok) {
+    throw new Error(`Unable to download transcript: ${response.status} ${response.statusText}`);
+  }
+
+  const transcriptData = await response.json();
+  const utterances = transcriptData?.result?.utterances;
+  if (!Array.isArray(utterances)) {
+    throw new Error("Transcript response does not contain result.utterances");
+  }
+
+  return {
+    utterances: utterances.map((utterance: any) => ({
+      speaker: utterance?.speaker ?? "Unknown",
+      text: utterance?.text ?? ""
+    }))
+  };
 }
 async function saveTranscriptController(botId : any, transcription: any) {
     await mkdir(transcriptsDirectory, { recursive: true });

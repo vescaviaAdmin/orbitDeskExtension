@@ -21,7 +21,6 @@ function createNotice(message, isError = false) {
 
 function showRecordingPrompt() {
   if (promptShown || document.getElementById("orbitdesk-recording-prompt")) return;
-  console.log("[orbitDesk] Showing recording confirmation dialog.");
   promptShown = true;
 
   const overlay = document.createElement("div");
@@ -42,7 +41,6 @@ function showRecordingPrompt() {
   startButton.textContent = "Yes, start recording";
   Object.assign(startButton.style, { marginRight: "10px", padding: "10px 14px", border: "0", borderRadius: "6px", background: "#1a73e8", color: "white", cursor: "pointer" });
   startButton.addEventListener("click", () => {
-    console.log("[orbitDesk] User selected: start recording.");
     overlay.remove();
     chrome.runtime.sendMessage({ type: "START_RECORDING", meetingUrl: location.href });
   });
@@ -51,7 +49,6 @@ function showRecordingPrompt() {
   cancelButton.textContent = "No thanks";
   Object.assign(cancelButton.style, { padding: "10px 14px", border: "0", borderRadius: "6px", background: "#e8eaed", color: "#202124", cursor: "pointer" });
   cancelButton.addEventListener("click", () => {
-    console.log("[orbitDesk] User selected: no thanks.");
     overlay.remove();
   });
 
@@ -60,16 +57,34 @@ function showRecordingPrompt() {
   document.body.appendChild(overlay);
 }
 
-function hasLeaveCallButton() {
-  return [...document.querySelectorAll("[aria-label]")]
-    .some((element) => element.getAttribute("aria-label")?.toLowerCase().includes("leave call"));
+function isLeaveMeetingControl(element) {
+  const label = [
+    element?.getAttribute("aria-label"),
+    element?.getAttribute("data-tooltip")
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return label.includes("leave call") || label.includes("leave meeting");
+}
+
+function hasLeaveMeetingControl() {
+  return [...document.querySelectorAll("[aria-label], [data-tooltip]")]
+    .some((element) => isLeaveMeetingControl(element));
+}
+
+function notifyMeetingEnded(reason) {
+  if (meetingEnded) return;
+
+  meetingEnded = true;
+  chrome.runtime.sendMessage({ type: "MEETING_ENDED" });
 }
 
 function watchForMeetingEnd() {
-  const leaveButtonVisible = hasLeaveCallButton();
+  const leaveButtonVisible = hasLeaveMeetingControl();
 
   if (leaveButtonVisible) {
-    if (!wasInMeeting) console.log("[orbitDesk] Meet call controls detected. Watching for meeting end.");
     wasInMeeting = true;
     missingLeaveButtonChecks = 0;
     return;
@@ -77,18 +92,26 @@ function watchForMeetingEnd() {
 
   if (wasInMeeting) missingLeaveButtonChecks += 1;
 
-  if (wasInMeeting && missingLeaveButtonChecks >= 3 && !meetingEnded) {
-    meetingEnded = true;
-    console.log("[orbitDesk] Meeting-end detected: Leave call button disappeared.");
-    chrome.runtime.sendMessage({ type: "MEETING_ENDED" });
+  if (wasInMeeting && missingLeaveButtonChecks >= 1) {
+    notifyMeetingEnded("Meet leave control disappeared");
   }
 }
+
+// Trigger retry immediately when the user clicks Meet's Leave call/meeting control.
+document.addEventListener("click", (event) => {
+  const target = event.target instanceof Element
+    ? event.target.closest("[aria-label], [data-tooltip]")
+    : null;
+
+  if (target && isLeaveMeetingControl(target)) {
+    notifyMeetingEnded("user clicked the leave control");
+  }
+}, true);
 
 chrome.runtime.onMessage.addListener((message) => {
   if (message.type === "SHOW_RECORDING_PROMPT") showRecordingPrompt();
   if (message.type === "STATUS_CHANGED") createNotice(message.message, message.status === "error");
 });
 
-console.log("[orbitDesk] Google Meet content script loaded.");
 chrome.runtime.sendMessage({ type: "MEET_OPENED", meetingUrl: location.href });
 setInterval(watchForMeetingEnd, 3000);
